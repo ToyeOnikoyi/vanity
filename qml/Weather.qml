@@ -32,7 +32,7 @@ Label{
 }
 
 
-ListModel {
+/*ListModel {
     id: dailyWeather
     ListElement {
         name: weatherData.getTempMaxList[1]
@@ -73,7 +73,7 @@ ListView {
         text: name + " " + number
         color: "white"
     }
-}
+}*/
 
 
 
