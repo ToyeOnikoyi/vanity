@@ -14,7 +14,7 @@ from weather.weather import WeatherData
 #obj.emitNow()
 
 
-# Main Function
+# Main Function, run this to run app.
 if __name__ == '__main__':
     # Create main app
     myApp = QApplication(sys.argv)

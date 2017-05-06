@@ -17,6 +17,12 @@ class GreetingData(QObject):
 
     def __init__(self, parent = None):
         super(GreetingData, self).__init__(parent)
+        self.timer = QTimer(self)
+        #changes greeting every 20 minutes, could make this a dynamic variable
+        self.timer.setInterval(2000000)
+        #run the emitNow function every second to emit the signal for realtime
+        self.timer.timeout.connect(self.emitNow)
+        self.timer.start()
 
 #    self.emitNow()
 
