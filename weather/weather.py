@@ -1,4 +1,5 @@
 import requests
+import time
 import random
 import json
 import forecastio
@@ -40,10 +41,24 @@ icon_lookup = {
     'hail': "assests/Hail.png"  # hail
 }
 
-class WeatherData(QObject):
+class WeatherData(QThread):
 
     weatherChanged = pyqtSignal()
+    ipChanged = pyqtSignal()
 
+
+    def __init__(self, parent = None):
+        super(WeatherData, self).__init__(parent)
+        #self.timer = QTimer(self)
+        #updates weather every 1 hour, could make this a dynamic variable
+    #    self.timer.setInterval(3600000)
+        #run the emitNow function every second to emit the signal for realtime
+    #    self.timer.timeout.connect(self.run)
+    #    self.timer.start()
+
+
+
+    @pyqtProperty(str, notify=ipChanged)
     def get_ip(self,):
         try:
             ip_url = "http://jsonip.com/"
@@ -57,20 +72,29 @@ class WeatherData(QObject):
             return "Error: %s. Cannot get ip." % e
 
     @pyqtSlot()
-    def emitNow(self):
-        self.weatherChanged.emit()
-        print "emit weather data signal"
+    def run(self):
+        while True:
+            #updates weather every 1 hour, could make this a dynamic variable
+            time.sleep(.5)
+            self.weatherChanged.emit()
+            self.ipChanged.emit()
+            time.sleep(300)
+            print "emit weather data and ip signal"
 
     @pyqtProperty(str, notify=weatherChanged)
     def getWeather(self):
         try:
+            ip_url = "http://jsonip.com/"
+            req = requests.get(ip_url)
+            ip_json = json.loads(req.text)
+            print ip_json
 
             if latitude is None or longitude is None:
                 # get my location
-                location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
+                location_req_url = "http://freegeoip.net/json/%s" % ip_json['ip']
                 r = requests.get(location_req_url)
                 location_obj = json.loads(r.text)
-                print location_obj
+                #print location_obj
 
                 lat = location_obj['latitude']
                 lon = location_obj['longitude']
@@ -95,17 +119,30 @@ class WeatherData(QObject):
             self.tempMaxList = []
             self.tempMinList = []
             self.tempIconList = []
+            self.maxMinTemp = {}
+            self.maxMinTempList = []
             #while numForcastDays <= 0:
             for dailyData in byDay.data:
-                dailyTemperatureMax = str(int(dailyData.temperatureMax))
+                dailyTemperatureMax = str(int(dailyData.temperatureMax)) #daily max temp
                 dailyTemperatureMin = str(int(dailyData.temperatureMin))
+                dailyDay = dailyData.time.strftime("%a") #day of the daily weather
                 dailyIcon = dailyData.icon
                 self.tempMaxList.append(dailyTemperatureMax)
                 self.tempMinList.append(dailyTemperatureMin)
                 self.tempIconList.append(dailyIcon)
-            print self.tempMaxList
-            print self.tempMinList
-            print self.tempIconList
+                self.maxMinTemp = {
+                    "maximum": dailyTemperatureMax,
+                    "minimum": dailyTemperatureMin,
+                    "img": dailyIcon,
+                    "day": dailyDay
+                }
+                #append each maxMin dict to the corresponding list
+                self.maxMinTempList.append(self.maxMinTemp)
+            #print self.maxMinTempList
+            #print self.tempMaxList
+            #print self.tempMinList
+            #print self.tempIconList
+
 
 
 
@@ -136,7 +173,7 @@ class WeatherData(QObject):
 
                 #    self.iconLbl.config(image=photo)
                 #    self.iconLbl.image = photo
-            return self.temperature2, self.forecast2, self.tempMaxList, self.tempMinList
+            return self.temperature2, self.forecast2, self.maxMinTempList
 
         except Exception as e:
             traceback.print_exc()
@@ -144,31 +181,60 @@ class WeatherData(QObject):
 
     @pyqtProperty(str, notify=weatherChanged)
     def getCurrentTemp(self):
-        a,b,c,d = self.getWeather
+        a,b,c = self.getWeather
         currentTemp = a
         #print currentTemp
         return currentTemp
 
     @pyqtProperty(str, notify=weatherChanged)
     def getCurrentForcast(self):
-        a,b,c,d = self.getWeather
+        a,b,c = self.getWeather
         currentForcast = b
         #print currentForcast
         return currentForcast
+    #convert python list to c++ array using QVariant. needed for qml to parse list
+    @pyqtProperty("QVariant", notify=weatherChanged)
+    def getMaxMinTempList(self):
+        a,b,c = self.getWeather
+        MaxMinTempList = c
+        #print MaxMinTempList
+        return MaxMinTempList
 
-    @pyqtProperty(str, notify=weatherChanged)
-    def getTempMaxList(self):
-        a,b,c,d = self.getWeather
-        tempMaxList = c
-        #print currentForcast
-        return tempMaxList
+#    @pyqtProperty("QVariant", notify=weatherChanged)
+#    def getMaxMinIconList(self):
+#        a,b,c = self.getWeather
+#        MaxMinTempList = c
+        #if MaxMinTempList["img"] == "clear-day":
+        #    continue
+        #elif MaxMinTempList["img"] == "clear-night":
+        #    continue
+        #elif MaxMinTempList["img"] == "rain":
+        #    continue
+        #elif MaxMinTempList["img"] == "snow":
+    #        continue
+    #    elif MaxMinTempList["img"] == "sleet":
+    #        continue
+    #    elif MaxMinTempList["img"] == "wind":
+    #        continue
+    #    elif MaxMinTempList["img"] == "fog":
+    #        continue
+    #    elif MaxMinTempList["img"] == "cloudy":
+    #        continue
+    #    elif MaxMinTempList["img"] == "partly-cloudy-day":
+    #        continue
+    #    elif MaxMinTempList["img"] == "partly-cloudy-night":
+    #        continue
+    #    elif MaxMinTempList["img"] == "hail":
+    #        continue
+    #    elif MaxMinTempList["img"] == "thunderstorm":
+    #        continue
+    #    elif MaxMinTempList["img"] == "tornado":
+    #        continue
 
-    @pyqtProperty(str, notify=weatherChanged)
-    def getTempMinList(self):
-        a,b,c,d = self.getWeather
-        tempMinList = d
-        #print currentForcast
-        return tempMinList
+#        return MaxMinTempList
+
+
+
 
 
 

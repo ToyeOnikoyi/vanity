@@ -8,7 +8,8 @@ from PyQt5.QtQuick import *
 from PyQt5.QtQml import *           #import qtqml engine
 
 
-class DateTimeData(QObject):
+
+class DateTimeData(QThread):
 
 
     dateChanged = pyqtSignal()
@@ -20,12 +21,20 @@ class DateTimeData(QObject):
 
     def __init__(self, parent = None):
         super(DateTimeData, self).__init__(parent)
+        self.timeTimer = QTimer(self)
+        self.timeTimer.setInterval(1000)
+        #run the emitNow function every second to emit the signal for realtime
+        self.timeTimer.timeout.connect(self.emitNow)
+        self.timeTimer.start()
+        #QThread.__init__(self)
 
 #    self.emitNow()
 
     @pyqtSlot()
     def emitNow(self):
-        self.dateTimeChanged.emit()
+        self.dateChanged.emit()
+        self.dayChanged.emit()
+        self.timeChanged.emit()
         print "emit date time signal"
 
     @pyqtProperty(str, notify=dateChanged)
@@ -46,5 +55,12 @@ class DateTimeData(QObject):
     def getTime(self):
         current_date_time = datetime.now() # gets the  current time object
         current_time = current_date_time.strftime("%-I:%M %p") #converts the time to string and formats for 12hr clock
+        #time.sleep(2)
         print current_time
         return current_time
+
+
+#    def run(self):
+#        new_time = self.getTime()
+#        self.dateTimeChanged.emit()
+        #self.sleep(2)

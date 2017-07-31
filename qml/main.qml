@@ -18,11 +18,21 @@ ApplicationWindow {
     visible: true
 
 
+     //CameraRec{}
+
      Greeting{}
 
      DateTime{}
 
      Weather{}
+
+     CalendarData{}
+
+     Hound{}
+
+
+
+
 
 
 
