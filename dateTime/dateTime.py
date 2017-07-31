@@ -9,7 +9,7 @@ from PyQt5.QtQml import *           #import qtqml engine
 
 
 
-class DateTimeData(QObject):
+class DateTimeData(QThread):
 
 
     dateChanged = pyqtSignal()

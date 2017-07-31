@@ -1,4 +1,5 @@
 import requests
+import time
 import random
 import json
 import forecastio
@@ -40,7 +41,7 @@ icon_lookup = {
     'hail': "assests/Hail.png"  # hail
 }
 
-class WeatherData(QObject):
+class WeatherData(QThread):
 
     weatherChanged = pyqtSignal()
     ipChanged = pyqtSignal()
@@ -48,12 +49,12 @@ class WeatherData(QObject):
 
     def __init__(self, parent = None):
         super(WeatherData, self).__init__(parent)
-        self.timer = QTimer(self)
+        #self.timer = QTimer(self)
         #updates weather every 1 hour, could make this a dynamic variable
-        self.timer.setInterval(3600000)
+    #    self.timer.setInterval(3600000)
         #run the emitNow function every second to emit the signal for realtime
-        self.timer.timeout.connect(self.emitNow)
-        self.timer.start()
+    #    self.timer.timeout.connect(self.run)
+    #    self.timer.start()
 
 
 
@@ -71,18 +72,26 @@ class WeatherData(QObject):
             return "Error: %s. Cannot get ip." % e
 
     @pyqtSlot()
-    def emitNow(self):
-        self.weatherChanged.emit()
-        self.ipChanged.emit()
-        print "emit weather data and ip signal"
+    def run(self):
+        while True:
+            #updates weather every 1 hour, could make this a dynamic variable
+            time.sleep(.5)
+            self.weatherChanged.emit()
+            self.ipChanged.emit()
+            time.sleep(300)
+            print "emit weather data and ip signal"
 
     @pyqtProperty(str, notify=weatherChanged)
     def getWeather(self):
         try:
+            ip_url = "http://jsonip.com/"
+            req = requests.get(ip_url)
+            ip_json = json.loads(req.text)
+            print ip_json
 
             if latitude is None or longitude is None:
                 # get my location
-                location_req_url = "http://freegeoip.net/json/%s" % self.get_ip()
+                location_req_url = "http://freegeoip.net/json/%s" % ip_json['ip']
                 r = requests.get(location_req_url)
                 location_obj = json.loads(r.text)
                 #print location_obj
@@ -188,13 +197,13 @@ class WeatherData(QObject):
     def getMaxMinTempList(self):
         a,b,c = self.getWeather
         MaxMinTempList = c
-        #print currentForcast
+        #print MaxMinTempList
         return MaxMinTempList
 
-    @pyqtProperty("QVariant", notify=weatherChanged)
-    def getMaxMinIconList(self):
-        a,b,c = self.getWeather
-        MaxMinTempList = c
+#    @pyqtProperty("QVariant", notify=weatherChanged)
+#    def getMaxMinIconList(self):
+#        a,b,c = self.getWeather
+#        MaxMinTempList = c
         #if MaxMinTempList["img"] == "clear-day":
         #    continue
         #elif MaxMinTempList["img"] == "clear-night":
@@ -222,8 +231,7 @@ class WeatherData(QObject):
     #    elif MaxMinTempList["img"] == "tornado":
     #        continue
 
-        return MaxMinTempList
-
+#        return MaxMinTempList
 
 
 

@@ -40,7 +40,7 @@ Label{
     width: 170
     wrapMode: Text.WrapAnywhere     //Wraps text to the end of the view
     x: 360
-    y: currentForcast.y + 20
+    y: currentForcast.y + 50
     color: "white"
 }
 
@@ -112,12 +112,12 @@ Label{
 
 Label{
     id:dayOneDay
-    text: weatherData.getMaxMinTempList[0]["day"]
+    text: "Today"
     height: parent.height
     width: 170
     wrapMode: Text.WrapAnywhere     //Wraps text to the end of the view
     x: 300
-    y: currentForcast.y + 20
+    y: currentForcast.y + 50
     color: "white"
 }
 
