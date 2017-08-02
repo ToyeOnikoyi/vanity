@@ -1,6 +1,6 @@
 import sys
 import time
-sys.path.append('/Users/mycomputer/python/packages/houndify')
+sys.path.append('\Users\Bah\Desktop\VanitySDK\houndify_py\houndify')
 import houndify
 import pyaudio
 import wave
@@ -46,8 +46,8 @@ class HoundData(QObject):
             audio = r.listen(source)
 
 
-        clientId = "UUPz7pzUJxSdQalaE5G3Tg=="
-        clientKey = "MKST1ByNb3ERQ26LOWsQI4nz1fKk-l1t4SsVumg_IKrdkV_fzli9RKGNuTfkZnEIGUj5lFySSTu4WetFX27hlg=="
+        clientId = "01GtytrXBLSLwHARibM1-w=="
+        clientKey = "hWKkQISSaQyLMYeqPbDcbv6TbbBsZIyJ9ab0aSGEw031l4NEZxwbzVUgT-veJ1i5GtBfDT13GaYzAngF-ifnhQ=="
         userId = "test_user"
         requestInfo = {
           'ClientID': clientId,
